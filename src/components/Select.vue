@@ -410,6 +410,16 @@
        * open (useful when combined with multi-select, for example)
        * @type {Boolean}
        */
+      searchByFirstLetter: {
+        type: Boolean,
+        default: false
+      },
+
+      /**
+       * Close a dropdown when an option is chosen. Set to false to keep the dropdown
+       * open (useful when combined with multi-select, for example)
+       * @type {Boolean}
+       */
       closeOnSelect: {
         type: Boolean,
         default: true
@@ -847,6 +857,9 @@
       filteredOptions() {
         let options = this.mutableOptions.filter((option) => {
           if (typeof option === 'object' && option.hasOwnProperty(this.label)) {
+            if ( this.searchByFirstLetter ) {
+              return option[this.label].toLowerCase().indexOf(this.search.toLowerCase()) == 0
+            }
             return option[this.label].toLowerCase().indexOf(this.search.toLowerCase()) > -1
           } else if (typeof option === 'object' && !option.hasOwnProperty(this.label)) {
             return console.warn(`[vue-select warn]: Label key "option.${this.label}" does not exist in options object.\nhttp://sagalbot.github.io/vue-select/#ex-labels`)
