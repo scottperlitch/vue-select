@@ -351,6 +351,42 @@
 
     props: {
       /**
+       * Select highlighted option on close
+       * @type {Boolean}
+       */
+      select_highlighted_option_on_close: {
+        type: Boolean,
+        default: true
+      },
+
+      /**
+       * Search by first letter
+       * @type {Boolean}
+       */
+      search_by_first_letter: {
+        type: Boolean,
+        default: true
+      },
+
+      /**
+       * Deselect option if re-clicked
+       * @type {Boolean}
+       */
+      deselect_option: {
+        type: Boolean,
+        default: false
+      },
+
+      /**
+       * Only removes options if they no longer exist
+       * @type {Boolean}
+       */
+      reset_options_if_needed: {
+        type: Boolean,
+        default: true
+      },
+
+      /**
        * Contains the currently selected value. Very similar to a
        * `value` attribute on an <input>. You can listen for changes
        * using 'change' event using v-on
@@ -437,16 +473,6 @@
       clearSearchOnSelect: {
         type: Boolean,
         default: true
-      },
-
-      /**
-       * Close a dropdown when an option is chosen. Set to false to keep the dropdown
-       * open (useful when combined with multi-select, for example)
-       * @type {Boolean}
-       */
-      searchByFirstLetter: {
-        type: Boolean,
-        default: false
       },
 
       /**
@@ -634,7 +660,11 @@
        * @return {[type]} [description]
        */
       mutableOptions() {
-        if (!this.taggable && this.resetOnOptionsChange) {
+        if (!this.taggable && this.reset_options_if_needed) {
+          if ( JSON.stringify(this.mutableOptions).indexOf(JSON.stringify(this.mutableValue)) == -1 ) {
+            this.mutableValue = this.multiple ? [] : null
+          }
+        } else if (!this.taggable && this.resetOnOptionsChange) {
 					this.mutableValue = this.multiple ? [] : null
         }
       },
@@ -670,7 +700,7 @@
        * @return {void}
        */
       select(option) {
-        if (this.isOptionSelected(option)) {
+        if (this.isOptionSelected(option) && this.deselect_option) {
           this.deselect(option)
         } else {
           if (this.taggable && !this.optionExists(option)) {
@@ -786,6 +816,9 @@
        * @return {void}
        */
       onSearchBlur() {
+        if (this.select_highlighted_option_on_close) {
+          this.typeAheadSelect();
+        }
         if (this.clearSearchOnBlur) {
           this.search = ''
         }
@@ -916,7 +949,7 @@
       filteredOptions() {
         let options = this.mutableOptions.filter((option) => {
           if (typeof option === 'object' && option.hasOwnProperty(this.label)) {
-            if ( this.searchByFirstLetter ) {
+            if ( this.search_by_first_letter ) {
               return option[this.label].toLowerCase().indexOf(this.search.toLowerCase()) == 0
             }
             return option[this.label].toLowerCase().indexOf(this.search.toLowerCase()) > -1
