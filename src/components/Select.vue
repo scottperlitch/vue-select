@@ -281,20 +281,106 @@
   .fade-leave-to {
     opacity: 0;
   }
+
+  /*---------------------------------------------------
+  | Modifications to original
+  ---------------------------------------------------*/
+  .v-select .selected-tag {
+    position: absolute;
+    top: 0px;
+    width: 100%;
+    text-align: center;
+    height: 37px;
+    padding: 0;
+    margin: 0;
+    line-height: 37px;
+    cursor: default;
+  }
+  .v-select .open-indicator {
+    display: none;
+  }
+  .v-select.searchable .dropdown-toggle {
+    border: none;
+    cursor: default;
+  }
+  .v-select.disabled .dropdown-toggle, .v-select.disabled .dropdown-toggle input, .v-select.disabled .selected-tag .close, .v-select.disabled .open-indicator {
+    cursor: default;
+    background-color: inherit;
+  }
+  .Selected_option_box {
+    height: 37px;
+    border: 1px solid #aaa;
+    text-align: center;
+    line-height: 37px;
+    background: #ccc;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .v-select.searchable .dropdown-toggle {
+    padding: 5px;
+    border: 1px solid #aaa;
+    border-top: 0px;
+    border-radius: 0;
+    opacity: 0;
+  }
+  .v-select.searchable.open .dropdown-toggle {
+    opacity: 1;
+  }
+  .v-select input[type="search"], .v-select input[type="search"]:focus {
+    width: 100% !important;
+    border: 1px solid #aaa;
+    cursor: default;
+  }
+  .v-select.open input[type="search"], .v-select.open input[type="search"]:focus {
+    cursor: text;
+  }
+  .v-select.single.open .selected-tag {
+    opacity: 1;
+  }
+  .v-select.single.open.searching .selected-tag,
+  .v-select.single.loading .selected-tag {
+    display: block;
+  }
+  .v-select .dropdown-menu {
+    padding: 0;
+  }
+  .v-select .dropdown-menu li {
+    text-align: center;
+  }
+  .v-select .dropdown-menu li a {
+    padding: 6px;
+    border-bottom: 1px solid #aaa;
+  }
+  .v-select .dropdown-menu > .highlight > a {
+    background-color: RGB(239,169,79);
+    color: black;
+  }
+  .v-select .dropdown-menu .active > a {
+    background-color: #ccc;
+    color: RGB(103,105,103);
+  }
+  .v-select .dropdown-menu .active.highlight > a {
+    color: black;
+  }
+  .v-select .no-options {
+    padding: 6px;
+  }
 </style>
 
 <template>
   <div :dir="dir" class="dropdown v-select" :class="dropdownClasses">
-    <div ref="toggle" @mousedown.prevent="toggleDropdown" :class="['dropdown-toggle', 'clearfix']">
+    <div ref="toggle" @mousedown.prevent="toggleDropdown" class="Selected_option_box" v-text="searchPlaceholder"></div>
+    <span ref="selected_option_text_toggle" @mousedown.prevent="toggleDropdown" class="selected-tag" v-for="option in valueAsArray" v-bind:key="option.index">
+      <slot name="selected-option" v-bind="option">
+        {{ getOptionLabel(option) }}
+      </slot>
+      <button v-if="multiple" :disabled="disabled" @click="deselect(option)" type="button" class="close" aria-label="Remove option">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </span>
 
-      <span class="selected-tag" v-for="option in valueAsArray" v-bind:key="option.index">
-        <slot name="selected-option" v-bind="option">
-          {{ getOptionLabel(option) }}
-        </slot>
-        <button v-if="multiple" :disabled="disabled" @click="deselect(option)" type="button" class="close" aria-label="Remove option">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </span>
+    <div ref="" @mousedown.prevent="" :class="['dropdown-toggle', 'clearfix']">
+
 
       <input
               ref="search"
@@ -309,7 +395,6 @@
               type="search"
               class="form-control"
               :disabled="disabled"
-              :placeholder="searchPlaceholder"
               :tabindex="tabindex"
               :readonly="!searchable"
               :style="{ width: isValueEmpty ? '100%' : 'auto' }"
@@ -384,6 +469,18 @@
       reset_options_if_needed: {
         type: Boolean,
         default: true
+      },
+
+      /**
+       * An optional callback function that is called on focus
+       * @type {Function}
+       * @param {Object || String} val
+       */
+      on_focus: {
+        type: Function,
+        default: function () {
+          this.$emit('dropdown')
+        }
       },
 
       /**
@@ -761,16 +858,20 @@
        * @return {void}
        */
       toggleDropdown(e) {
-        if (e.target === this.$refs.openIndicator || e.target === this.$refs.search || e.target === this.$refs.toggle || e.target === this.$el) {
-          if (this.open) {
-            this.$refs.search.blur() // dropdown will close on blur
+      var self = this
+      window.setTimeout(function () {
+        if (e.target === self.$refs.openIndicator || e.target === self.$refs.toggle || e.target === self.$el || 
+          e.target === self.$refs.selected_option_text_toggle[0] || e.target === self.$refs.toggle3[0] ) {
+          if (self.open) {
+            self.$refs.search.blur() // dropdown will close on blur
           } else {
-            if (!this.disabled) {
-              this.open = true
-              this.$refs.search.focus()
+            if (!self.disabled) {
+              self.open = true;
+                  self.$refs.search.focus();
+              }
             }
           }
-        }
+        }, 0);
       },
 
       /**
@@ -832,6 +933,9 @@
        * @return {void}
        */
       onSearchFocus() {
+        if ( this.on_focus ) {
+          this.on_focus();
+        }
         this.open = true
         this.$emit('search:focus')
       },
