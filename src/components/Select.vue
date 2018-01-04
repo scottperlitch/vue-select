@@ -560,7 +560,7 @@
        */
       transition: {
         type: String,
-        default: 'fade'
+        default: ''
       },
 
       /**
