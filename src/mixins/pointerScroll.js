@@ -77,5 +77,18 @@ module.exports = {
     scrollTo(position) {
       return this.$refs.dropdownMenu ? this.$refs.dropdownMenu.scrollTop = position : null
     },
+
+    /**
+     * Scroll the dropdownMenu to the searched (active) item
+     * @returns {*}
+     */
+    adjust_scroll_after_search() {
+      var nodes = Array.prototype.slice.call( this.$refs.dropdownMenu.children );
+      var x = document.querySelectorAll('.dropdown-menu .active')[0];
+      this.typeAheadPointer = nodes.indexOf( x );
+      let pixelsToPointerTop = this.pixelsToPointerTop()
+      let pixelsToPointerBottom = this.pixelsToPointerBottom()
+      return this.scrollTo( pixelsToPointerTop - (this.pointerHeight() * 5 ));
+    },
   }
 }

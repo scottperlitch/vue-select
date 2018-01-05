@@ -900,11 +900,14 @@
           } else {
             if (!self.disabled) {
               self.mutable_is_open = true;
-                  self.$refs.search.focus();
-              }
+              self.$refs.search.focus();
+              setTimeout(function() {
+                self.adjust_scroll_after_search();
+              }, 0);
             }
           }
-        }, 0);
+        }
+      }, 0);
       },
 
       /**
