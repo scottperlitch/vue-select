@@ -436,6 +436,14 @@
 
     props: {
       /**
+       * Set select to be opened or closed
+       * @type {Boolean}
+       */
+      is_open: {
+        type: Boolean,
+        default: false
+      },
+      /**
        * Select highlighted option on close
        * @type {Boolean}
        */
@@ -480,6 +488,18 @@
         type: Function,
         default: function () {
           this.$emit('dropdown')
+        }
+      },
+
+      /**
+       * An optional callback function that is called on blur
+       * @type {Function}
+       * @param {Object || String} val
+       */
+      on_blur: {
+        type: Function,
+        default: function () {
+          this.$emit('selected')
         }
       },
 
@@ -710,7 +730,8 @@
     data() {
       return {
         search: '',
-        open: false,
+        //open: false,
+        mutable_is_open: false,
         mutableValue: null,
         mutableOptions: []
       }
@@ -725,6 +746,16 @@
        */
       value(val) {
 				this.mutableValue = val
+      },
+
+      /**
+      * When the is_open prop changes, update
+      * the internal mutable_is_open.
+      * @param  {mixed} val
+      * @return {void}
+      */
+      is_open(val) {
+        this.mutable_is_open = val
       },
 
       /**
@@ -785,6 +816,7 @@
 			this.mutableValue = this.value
       this.mutableOptions = this.options.slice(0)
 			this.mutableLoading = this.loading
+      this.mutable_is_open = this.is_open
 
       this.$on('option:created', this.maybePushTag)
     },
@@ -843,7 +875,8 @@
        */
       onAfterSelect(option) {
         if (this.closeOnSelect) {
-          this.open = !this.open
+          //this.open = !this.open
+          this.mutable_is_open = !this.mutable_is_open
           this.$refs.search.blur()
         }
 
@@ -862,11 +895,11 @@
       window.setTimeout(function () {
         if (e.target === self.$refs.openIndicator || e.target === self.$refs.toggle || e.target === self.$el || 
           e.target === self.$refs.selected_option_text_toggle[0] || e.target === self.$refs.toggle3[0] ) {
-          if (self.open) {
+          if (self.mutable_is_open) {
             self.$refs.search.blur() // dropdown will close on blur
           } else {
             if (!self.disabled) {
-              self.open = true;
+              self.mutable_is_open = true;
                   self.$refs.search.focus();
               }
             }
@@ -923,7 +956,12 @@
         if (this.clearSearchOnBlur) {
           this.search = ''
         }
-        this.open = false
+        //this.open = false
+        //this.is_open = false
+        if ( this.on_blur ) {
+          this.on_blur();
+        }
+        this.mutable_is_open = false
         this.$emit('search:blur')
       },
 
@@ -936,7 +974,8 @@
         if ( this.on_focus ) {
           this.on_focus();
         }
-        this.open = true
+        //this.open = true
+        this.mutable_is_open = true
         this.$emit('search:focus')
       },
 
@@ -1028,7 +1067,13 @@
        * @return {Boolean} True if open
        */
       dropdownOpen() {
-        return this.noDrop ? false : this.open && !this.mutableLoading
+        if ( this.noDrop ) {
+          return false
+        } else if ( this.mutable_is_open && !this.mutableLoading) {
+          this.$refs.search.focus();
+          return true
+        }
+        //return this.noDrop ? false : this.open && !this.mutableLoading
       },
 
       /**
