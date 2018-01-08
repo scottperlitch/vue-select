@@ -56,7 +56,7 @@ module.exports = {
         var self = this;
         setTimeout(function() {
           self.search = "";
-        }, 0);
+        }, 100);
       }
     },
   }
