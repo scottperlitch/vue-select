@@ -84,11 +84,13 @@ module.exports = {
      */
     adjust_scroll_after_search() {
       var nodes = Array.prototype.slice.call( this.$refs.dropdownMenu.children );
-      var x = document.querySelectorAll('.dropdown-menu .active')[0];
-      this.typeAheadPointer = nodes.indexOf( x );
-      let pixelsToPointerTop = this.pixelsToPointerTop()
-      let pixelsToPointerBottom = this.pixelsToPointerBottom()
-      return this.scrollTo( pixelsToPointerTop - (this.pointerHeight() * 5 ));
+      var active_item = this.$refs.dropdownMenu.querySelector('.active');
+      if ( active_item ) {
+        this.typeAheadPointer = nodes.indexOf( active_item );
+        let pixelsToPointerTop = this.pixelsToPointerTop()
+        let pixelsToPointerBottom = this.pixelsToPointerBottom()
+        return this.scrollTo( pixelsToPointerTop - (this.pointerHeight() * 5 ));
+      }
     },
   }
 }
