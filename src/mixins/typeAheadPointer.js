@@ -53,7 +53,10 @@ module.exports = {
       }
 
       if( this.clearSearchOnSelect ) {
-        this.search = "";
+        var self = this;
+        setTimeout(function() {
+          self.search = "";
+        }, 0);
       }
     },
   }

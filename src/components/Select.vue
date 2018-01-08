@@ -881,7 +881,7 @@
         }
 
         if (this.clearSearchOnSelect) {
-          this.search = ''
+          //this.search = ''
         }
       },
 
@@ -957,7 +957,7 @@
           this.typeAheadSelect();
         }
         if (this.clearSearchOnBlur) {
-          this.search = ''
+          //this.search = ''
         }
         //this.open = false
         //this.is_open = false
