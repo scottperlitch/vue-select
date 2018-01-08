@@ -895,6 +895,7 @@
       window.setTimeout(function () {
         if (e.target === self.$refs.openIndicator || e.target === self.$refs.toggle || e.target === self.$el || 
           e.target === self.$refs.selected_option_text_toggle[0] || e.target === self.$refs.toggle3[0] ) {
+          console.log('here');
           if (self.mutable_is_open) {
             self.$refs.search.blur() // dropdown will close on blur
           } else {
@@ -979,6 +980,12 @@
         }
         //this.open = true
         this.mutable_is_open = true
+
+        var self = this;
+        setTimeout(function() {
+          self.adjust_scroll_after_search();
+        }, 0);
+
         this.$emit('search:focus')
       },
 
